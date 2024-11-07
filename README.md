@@ -15,7 +15,8 @@
 3. **安装依赖**：
    ```
    pip install requests schedule googletrans==4.0.0-rc1 PyGithub
-  ```
+   ```
+
 ## 运行脚本：
 ```
 python hacknews_bot.py
