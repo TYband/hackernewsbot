@@ -33,25 +33,4 @@ upload_to_github()：检查是否存在当天文件，并根据情况进行创�
 Google Translate：请确保 Google Translate API 未被墙，或使用合适的代理。
 GitHub Token 权限：GitHub 访问令牌应具有推送权限。
 运行频率：默认每 3 小时运行一次，如需调整，可在 schedule.every(3).hours 修改频率。
-日志记录
-所有的任务执行、获取新闻数据、翻译和推送更新均会记录在日志文件 hacknews_bot.log 中，以便调试和记录执行情况。
 
-示例
-生成的 Markdown 文件样例如下：
-
----
-layout: post
-title: Hacknews 2024-11-07 新闻
-category: Hacknews
-tags: hacknews
-keywords: hacknews
-coverage: hacknews-banner.jpg
----
-
-Hacker News 是一家关于计算机黑客和创业公司的社会化新闻网站，由保罗·格雷厄姆的创业孵化器 Y Combinator 创建。
-与其它社会化新闻网站不同的是 Hacker News 没有踩或反对一条提交新闻的选项（不过评论还是可以被有足够 Karma 的用户投反对票）；只可以赞或是完全不投票。简而言之，Hacker News 允许提交任何可以被理解为“任何满足人们求知欲”的新闻。
-
-## HackNews Hack新闻
-
-- [Sample News Title](https://news.ycombinator.com/item?id=123456)
-- 样例新闻标题
