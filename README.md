@@ -39,7 +39,6 @@ GitHub Token 权限：GitHub 访问令牌应具有推送权限。
 示例
 生成的 Markdown 文件样例如下：
 
-
 ---
 layout: post
 title: Hacknews 2024-11-07 新闻
