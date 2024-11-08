@@ -8,44 +8,33 @@ from github import Github
 import logging
 
 # 配置日志
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler(), logging.FileHandler("hacknews_bot.log")])
+logging.basicConfig(level=logging.INFO,  # 设置日志级别为 INFO
+                    format='%(asctime)s - %(levelname)s - %(message)s',  # 设置输出格式
+                    handlers=[logging.StreamHandler(), logging.FileHandler("hacknews_bot.log")])  # 同时输出到控制台和文件
 
 # 配置
 HACKERNEWS_API = "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"
-GITHUB_REPO = ""
-GITHUB_TOKEN = ""
-GITHUB_DIR_PATH = "_posts/hacknews"
-
-# 获取当天的时间戳
-def get_today_timestamp():
-    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    return int(today_start.timestamp())
+GITHUB_REPO = ""  # 替换为你的 GitHub 仓库
+GITHUB_TOKEN = ""  # 替换为你的 GitHub Token
+GITHUB_DIR_PATH = ""  # 存放 Markdown 文件的目录
 
 # 获取 Hacker News 数据
 def get_hacker_news():
     logging.info("正在获取 Hacker News 数据...")
     response = requests.get(HACKERNEWS_API)
-    top_ids = response.json()
+    top_ids = response.json()  # 获取所有新闻的 ID 列表
     news_items = []
-    today_timestamp = get_today_timestamp()
-
     for item_id in top_ids:
         item_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json?print=pretty"
         item_response = requests.get(item_url)
         item = item_response.json()
-        if item and item.get('time', 0) >= today_timestamp:
-            # 获取新闻的实际 URL（如果有）
-            article_url = item.get("url", f"https://news.ycombinator.com/item?id={item.get('id')}")
+        if item:
             news_items.append({
-                "id": item.get("id"),
                 "title": item.get("title"),
-                "url": article_url,  # 使用实际文章的 URL
-                "translation": None
+                "url": f"https://news.ycombinator.com/item?id={item.get('id')}",
+                "translation": None  # 初始为空
             })
-
-    logging.info(f"成功获取到 {len(news_items)} 条当天的 Hacker News 数据")
+    logging.info(f"成功获取到 {len(news_items)} 条 Hacker News 数据")
     return news_items
 
 # 翻译新闻标题
@@ -57,124 +46,87 @@ def translate_news(news_items):
     logging.info("新闻标题翻译完成")
     return news_items
 
-# 获取当前日期并格式化
-def get_current_date():
-    return datetime.now().strftime('%Y-%m-%d')
-
-# 获取已上传新闻 ID
-def get_uploaded_news_ids():
-    if not os.path.exists('uploaded_news_ids.txt'):
-        return []
-    with open('uploaded_news_ids.txt', 'r') as f:
-        return [line.strip() for line in f.readlines()]
-
-# 更新已上传新闻 ID
-def update_uploaded_news_ids(new_ids):
-    with open('uploaded_news_ids.txt', 'a') as f:
-        for new_id in new_ids:
-            f.write(f"{new_id}\n")
-
-# 检查新闻是否已经存在
-def check_existing_news(news_items):
-    uploaded_news_ids = get_uploaded_news_ids()
-    new_news = []
-
-    for item in news_items:
-        if item["id"] not in uploaded_news_ids:
-            new_news.append(item)
-
-    logging.info(f"共找到 {len(new_news)} 条新增新闻")
-    return new_news
-
-# 生成 Markdown 内容，首次创建时包含头部信息
-def generate_markdown(news_items, current_date, is_new_file):
+# 生成 Markdown 内容
+def generate_markdown(news_items, current_date):
     logging.info("正在生成 Markdown 文件内容...")
-    header = f'''---
+    template = '''---
 layout: post
-title: Hacknews {current_date} 新闻
+title: Hacknews {date} 新闻
 category: Hacknews
 tags: hacknews
 keywords: hacknews
 coverage: hacknews-banner.jpg
 ---
 
-Hacker News 是一家关于计算机黑客和创业公司的社会化新闻网站，由保罗·格雷厄姆的创业孵化器 Y Combinator 创建。
+
+Hacker News 是一家关于计算机黑客和创业公司的社会化新闻网站，由保罗·格雷厄姆的创业孵化器 Y Combinator 创建。  
 与其它社会化新闻网站不同的是 Hacker News 没有踩或反对一条提交新闻的选项（不过评论还是可以被有足够 Karma 的用户投反对票）；只可以赞或是完全不投票。简而言之，Hacker News 允许提交任何可以被理解为“任何满足人们求知欲”的新闻。
 
 ## HackNews Hack新闻
-''' if is_new_file else ""
 
+{items}
+'''
+
+    # 处理新闻项
     items = ""
     for item in news_items:
         items += f"- [{item['title']}]({item['url']})\n"
         items += f"- {item['translation']}\n"
 
-    markdown_content = header + items
+    # 格式化模板，将 {date} 替换为实际的日期，{items} 替换为新闻列表
+    markdown_content = template.format(date=current_date, items=items)
     logging.info("Markdown 文件内容生成完成")
     return markdown_content
 
 # 上传到 GitHub 仓库
-def upload_to_github(content, current_date, is_new_file, new_news_ids):
+def upload_to_github(content, current_date):
     logging.info("正在上传到 GitHub...")
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(GITHUB_REPO)
 
-    filename = f"{current_date}-hacknews.md"
+    # 生成文件名格式：YYYY-MM-DD-hacknews.md
+    filename = current_date + "-hacknews.md"
     file_path = os.path.join(GITHUB_DIR_PATH, filename)
 
     try:
+        # 尝试获取文件内容
         file = repo.get_contents(file_path)
-        new_content = file.decoded_content.decode() + content  # 追加新新闻
+        # 文件存在，先获取当前内容，然后追加新的新闻
+        current_content = file.decoded_content.decode("utf-8")
+        new_content = current_content + content
         repo.update_file(file.path, "Update Hacknews post", new_content, file.sha)
         logging.info(f"成功更新 {file_path} 在 GitHub 上")
-    except Exception:
+    except Exception as e:
+        # 如果文件不存在，则创建新的文件
         repo.create_file(file_path, "Create Hacknews post", content)
         logging.info(f"成功创建 {file_path} 在 GitHub 上")
 
-    # 上传成功后更新已上传的新闻 ID
-    update_uploaded_news_ids(new_news_ids)
+# 获取当前日期并格式化
+def get_current_date():
+    return datetime.now().strftime('%Y-%m-%d')
 
 # 定时任务函数
 def scheduled_task():
     current_date = get_current_date()
     logging.info(f"任务开始，当前日期是: {current_date}")
 
-    news_items = get_hacker_news()
-    news_items = translate_news(news_items)
-
-    # 检查文件是否已经存在
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(GITHUB_REPO)
-    file_path = os.path.join(GITHUB_DIR_PATH, f"{current_date}-hacknews.md")
-
-    try:
-        file = repo.get_contents(file_path)
-        existing_content = file.decoded_content.decode()
-        # 提取文件中的新闻 ID 列表
-        existing_news_ids = [line.split('id=')[1].split(')')[0] for line in existing_content.splitlines() if 'item?id=' in line]
-        is_new_file = False  # 文件已存在
-    except Exception:
-        existing_news_ids = []  # 文件不存在，初始化为空
-        is_new_file = True  # 文件不存在，标记为新文件
-
-    # 获取新增的新闻
-    new_news_items = check_existing_news(news_items)
-
-    if new_news_items:
-        # 获取新新闻的 ID 列表
-        new_news_ids = [item['id'] for item in new_news_items]
-        markdown_content = generate_markdown(new_news_items, current_date, is_new_file)
-        upload_to_github(markdown_content, current_date, is_new_file, new_news_ids)
+    news_items = get_hacker_news()  # 获取所有 Hacker News 新闻
+    news_items = translate_news(news_items)  # 翻译新闻
+    markdown_content = generate_markdown(news_items, current_date)  # 生成 Markdown 内容
+    upload_to_github(markdown_content, current_date)  # 上传到 GitHub
 
     logging.info(f"任务完成，{current_date} 的新闻已经上传到 GitHub")
 
 # 主函数
 def main():
+    # 每3小时执行一次定时任务
     schedule.every(3).hours.do(scheduled_task)
+
+    # 启动定时任务
     logging.info("脚本已启动，正在等待执行定时任务...")
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(1)  # 稍等1秒钟，防止CPU占用过高
 
 if __name__ == "__main__":
     main()
