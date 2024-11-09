@@ -40,12 +40,12 @@ GitHub Token 权限：GitHub 访问令牌应具有推送权限。
 
 ## 更新
 2024.11.9
-需卸载旧版本安装新版本 googletrans
+需卸载旧版本googletrans，安装deep-translator
 卸载旧版本 googletrans
 ```
 pip uninstall googletrans
 ```
-安装新版本 googletrans
+安装deep-translator
 ```
-pip install googletrans==4.0.0-rc1
+pip install deep-translator
 ```
