@@ -37,3 +37,15 @@ Google Translate：请确保 Google Translate API 未被墙，或使用合适的
 GitHub Token 权限：GitHub 访问令牌应具有推送权限。
 运行频率：默认每 3 小时运行一次，如需调整，可在 schedule.every(3).hours 修改频率。
 
+
+## 更新
+2024.11.9
+需卸载旧版本安装新版本 googletrans
+卸载旧版本 googletrans
+```
+pip uninstall googletrans
+```
+安装新版本 googletrans
+```
+pip install googletrans==4.0.0-rc1
+```
