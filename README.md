@@ -49,3 +49,6 @@ pip uninstall googletrans
 ```
 pip install deep-translator
 ```
+
+2024.11.10
+解决了不能触发GitHub pages重新构建的问题，正在测试中。。。
