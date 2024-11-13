@@ -24,12 +24,14 @@ def get_hacker_news():
     response = requests.get(HACKERNEWS_API)
     top_ids = response.json()
     news_items = []
-    for item_id in top_ids[:10]:  # 控制数量以提高效率
+    for item_id in top_ids[:50]:  # 控制数量以提高效率
         item_url = f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json?print=pretty"
         item_response = requests.get(item_url)
         item = item_response.json()
         if item:
+            # 使用 item_id 作为唯一的 id
             news_items.append({
+                "id": item_id,
                 "title": item.get("title"),
                 "url": item.get("url", ""),
                 "translation": None
@@ -59,9 +61,10 @@ category: Hacknews
 tags: hacknews
 keywords: hacknews
 coverage: hacknews-banner.jpg
+id: {unique_id}
 ---
 
-Hacker News 是一家关于计算机黑客和创业公司的社会化新闻网站，由保罗·格雷厄姆的创业孵化器 Y Combinator 创建。  
+Hacker News 是一家关于计算机黑客和创业公司的社会化新闻网站，由保罗·格雷厄姆的创业孵化器 Y Combinator 创建。
 
 ## HackNews Hack新闻
 
@@ -70,10 +73,12 @@ Hacker News 是一家关于计算机黑客和创业公司的社会化新闻网�
 
     items = ""
     for item in news_items:
+        # 为每个新闻项生成唯一的 id，使用 item_id 或者 url
+        unique_id = item['id']  # 可以改为 item['url'] 或其他
         items += f"- [{item['title']}]({item['url']})\n"
         items += f"- {item['translation']}\n"
 
-    markdown_content = template.format(date=current_date, items=items)
+    markdown_content = template.format(date=current_date, unique_id=unique_id, items=items)
     logging.info("Markdown 文件内容生成完成")
     return markdown_content
 
@@ -88,7 +93,7 @@ def upload_to_github(content, current_date):
 
     try:
         file = repo.get_contents(file_path)
-        current_content = file.decoded_content.decode("utf-8")
+        current_content = file.decoded_content.decode("utf-8")  # 这里定义了 current_content
 
         # 检查内容是否一致
         if current_content == content:
@@ -101,7 +106,8 @@ def upload_to_github(content, current_date):
         # 如果内容不同，则更新文件
         repo.update_file(file.path, "Update Hacknews post", content, file.sha)
         logging.info(f"成功更新 {file_path} 在 GitHub 上")
-    except Exception:
+    except Exception as e:
+        logging.error(f"文件更新失败，错误: {e}")
         # 如果文件不存在，创建新文件
         repo.create_file(file_path, "Create Hacknews post", content)
         logging.info(f"成功创建 {file_path} 在 GitHub 上")
@@ -125,7 +131,7 @@ def scheduled_task():
 # 主函数
 def main():
     # 每3小时执行一次定时任务
-    schedule.every(3).hours.do(scheduled_task)
+    schedule.every(3).hours.do(scheduled_task) 
 
     # 启动定时任务
     logging.info("脚本已启动，正在等待执行定时任务...")
