@@ -23,10 +23,11 @@ python hacknews_bot.py
 ```
 或将该脚本设置为系统服务，以便后台运行。
 ## 项目依赖
-requests：用于发起 HTTP 请求以获取 Hacker News 数据。
-schedule：用于设置定时任务。
-googletrans：用于将新闻标题从英文翻译为中文。
-PyGithub：用于操作 GitHub API 推送内容。
+requests：用于从 Hacker News API 获取新闻数据。
+schedule：用于调度定时任务。
+deep_translator：用于将新闻标题从英文翻译成中文。
+github：用于将生成的 Markdown 文件上传到 GitHub。
+logging：用于记录日志（已内置，无需额外安装）。
 ## 主要代码逻辑
 get_hacker_news()：调用 Hacker News API 获取最新新闻数据。
 translate_news()：使用 Google 翻译 API 将新闻标题翻译成中文。
