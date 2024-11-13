@@ -52,3 +52,7 @@ pip install deep-translator
 
 2024.11.10
 解决了不能触发GitHub pages重新构建的问题，正在测试中。。。
+
+
+2024.11.13
+可以正常使用了，请使用这个版本
