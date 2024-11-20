@@ -1,53 +1,38 @@
-# Hacker News 自动推送脚本
+# Hacker News 自动转发与翻译 Bot
 
-## 项目简介
+这是一个 Python 脚本，自动从 Hacker News 获取热门新闻，翻译新闻标题为中文，并生成 Markdown 文件上传到 GitHub 仓库，方便部署在个人博客上。适合每日新闻分享和自动化发布。
 
-该项目是一个自动化脚本，用于定时获取 Hacker News 当日热门新闻并推送至指定的 GitHub 仓库。通过 GitHub Actions 或本地调度，该脚本会每 3 小时从 Hacker News 获取最新的热门新闻，自动翻译成中文，并生成 Markdown 格式的新闻更新文件。如果当天文件尚不存在，它会创建一个带头部信息的文件；如果已存在，则仅更新内容部分。适合搭建个人博客每日新闻推送等应用。
+## 功能简介
 
-## 功能说明
+- **获取 Hacker News 热门新闻**：使用 Hacker News 官方 API 获取每日热门新闻。
+- **自动翻译**：通过 `deep_translator` 将新闻标题翻译为中文。
+- **生成 Markdown 文件**：按照预设模板生成适合 Jekyll 的 Markdown 文件。
+- **自动上传到 GitHub**：利用 `PyGithub` 实现文件的上传或更新。
 
-- **定时获取 Hacker News 热门新闻**：每 3 小时运行一次，获取最新 50 条当天新闻。
-- **标题自动翻译**：使用 Google 翻译 API 将英文标题翻译为中文。
-- **Markdown 文件生成**：如果是当天首次创建文件，生成包含头部信息的 Markdown 文件；否则，仅追加新闻内容。
-- **自动推送到 GitHub**：将更新的文件推送至 GitHub 仓库，可用于静态博客每日新闻更新。
+## 环境依赖
 
-## 使用指南
+- Python 3.7 或更高版本
+- 需要安装以下 Python 库：
+  ```
+  pip install requests schedule deep-translator PyGithub
+  ```
+克隆项目：
+  ```
+git clone git@github.com:TYband/hackernewsbot.git
+cd TYband/hackernewsbot
+  ```
+设置脚本中的配置项： 打开 hack.py，配置以下参数：
 
-1. **配置 GitHub 仓库**：在 `GITHUB_REPO` 中设置你要推送到的 GitHub 仓库地址（如 `username/repository`）。
-2. **配置 GitHub Token**：在 `GITHUB_TOKEN` 中填入你的 GitHub 访问令牌，确保有写入权限。
-
-3. **安装依赖**：
-
-    ```bash
-    pip install requests schedule deep-translator PyGithub
-    ```
-
-4. **运行脚本**：
-
-    ```bash
-    python hacknews_bot.py
-    ```
-
-    或将该脚本设置为系统服务，以便后台运行。
-
-## 项目依赖
-
-- `requests`：用于从 Hacker News API 获取新闻数据。
-- `schedule`：用于调度定时任务。
-- `deep_translator`：用于将新闻标题从英文翻译成中文。
-- `PyGithub`：用于将生成的 Markdown 文件上传到 GitHub。
-- `logging`：用于记录日志（已内置，无需额外安装）。
-
-## 主要代码逻辑
-
-1. `get_hacker_news()`：调用 Hacker News API 获取最新新闻数据。
-2. `translate_news()`：使用 Google 翻译 API 将新闻标题翻译成中文。
-3. `generate_markdown()`：生成或追加 Markdown 文件内容。
-4. `upload_to_github()`：检查是否存在当天文件，并根据情况进行创建或更新。
-
-## 注意事项
-
-- **Google Translate**：请确保 Google Translate API 未被墙，或使用合适的代理。
-- **GitHub Token 权限**：GitHub 访问令牌应具有推送权限。
-- **运行频率**：默认每 3 小时运行一次，如需调整，可在 `schedule.every(3).hours` 修改频率。
-
+GITHUB_REPO：你的 GitHub 仓库名称（格式为 用户名/仓库名）。
+GITHUB_TOKEN：你的 GitHub TOKEN。
+GITHUB_DIR_PATH：存放 Markdown 文件的目录路径。
+HACKERNEWS_API：Hacker News API 地址（通常无需更改）。
+运行脚本：
+  ```
+python hack.py
+  ```
+定时任务
+脚本默认每 3 小时执行一次任务。你可以修改以下代码调整频率：
+  ```
+schedule.every(3).hours.do(scheduled_task)
+  ```
