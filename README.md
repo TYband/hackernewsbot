@@ -24,9 +24,13 @@ cd TYband/hackernewsbot
 设置脚本中的配置项： 打开 hack.py，配置以下参数：
 
 GITHUB_REPO：你的 GitHub 仓库名称（格式为 用户名/仓库名）。
+
 GITHUB_TOKEN：你的 GitHub TOKEN。
+
 GITHUB_DIR_PATH：存放 Markdown 文件的目录路径。
+
 HACKERNEWS_API：Hacker News API 地址（通常无需更改）。
+
 运行脚本：
   ```
 python hack.py
