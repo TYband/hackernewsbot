@@ -29,8 +29,6 @@ GITHUB_TOKEN：你的 GitHub TOKEN。
 
 GITHUB_DIR_PATH：存放 Markdown 文件的目录路径。
 
-HACKERNEWS_API：Hacker News API 地址（通常无需更改）。
-
 运行脚本：
   ```
 python hack.py
