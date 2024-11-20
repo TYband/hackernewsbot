@@ -11,8 +11,8 @@
 
 ## 环境依赖
 
-- Python 3.7 或更高版本
-- 需要安装以下 Python 库：
+Python 3.7 或更高版本
+需要安装以下 Python 库：
   ```
   pip install requests schedule deep-translator PyGithub
   ```
